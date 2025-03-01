@@ -14,7 +14,6 @@ const DashboardPage = () => {
         pageName="Skybridge Dashboard"
         description="You're using a Fundraiser account"
       />
-
       <SkybridgeOccasions/>
     </>
   );
