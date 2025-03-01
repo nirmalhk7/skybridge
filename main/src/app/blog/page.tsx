@@ -16,6 +16,7 @@ const Blog = () => {
       <Breadcrumb
         pageName="Blog Grid"
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        breadcrumbs={[{name:"Home",href:"/"},{name:"Blog Grid", href:"/blog"}]}
       />
 
       <section className="pb-[120px] pt-[120px]">
