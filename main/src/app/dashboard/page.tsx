@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Welcome to Skybridge",
 };
 
-const AboutPage = () => {
+const DashboardPage = () => {
   return (
     <>
       <Breadcrumb
@@ -20,4 +20,4 @@ const AboutPage = () => {
   );
 };
 
-export default AboutPage;
+export default DashboardPage;
