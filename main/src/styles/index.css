@@ -30,4 +30,10 @@
   input#checkboxLabel:checked ~ .box span {
     @apply opacity-100;
   }
+
+  input[type="text"],
+  input[type="email"],
+  select {
+    @apply w-full rounded-sm border px-6 py-3 text-base text-body-color outline-none dark:shadow-two dark:focus:shadow-none;
+  }
 }
