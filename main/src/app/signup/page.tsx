@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { Metadata } from "next";
-import { useState } from "react";
 
 export const metadata: Metadata = {
   title: "Sign Up Page | Free Next.js Template for Skybridge and SaaS",
@@ -9,7 +8,6 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const [profile, changeProfile] = useState({})
 
 const SignupPage = () => {
   return (
