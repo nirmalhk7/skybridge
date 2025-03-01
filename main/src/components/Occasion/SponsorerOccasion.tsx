@@ -1,28 +1,53 @@
 "use client";
-import React, { useState } from "react";
-import { CountrySelect, StateSelect } from "react-country-state-city";
+import React, { useEffect, useState } from "react";
+import { CountrySelect, GetCountries, GetState, StateSelect } from "react-country-state-city";
 
 const SponsorerOccasion: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "usa",
-    statePreference: "california",
-    agePreference: "10-20",
+    countryPreference: "",
+    statePreference: [],
+    agePreference: [],
     message: "",
   });
+
+  const [countriesList, setCountriesList] = useState([]);
+  const [stateList, setStateList] = useState([]);
+  useEffect(() => {
+    GetCountries().then((result) => {
+      setCountriesList(result);
+    });
+  }, []);
+  useEffect(() => {
+    if (formData.countryPreference)
+      GetState(parseInt(formData.countryPreference)).then((result) => {
+        setStateList(result);
+      });
+  }, [formData.countryPreference]);
+
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, multiple, options } = e.target;
+    if (multiple) {
+      const values = Array.from(options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+      setFormData({
+        ...formData,
+        [name]: values,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,13 +131,15 @@ const SponsorerOccasion: React.FC = () => {
                     >
                       Country Preference
                     </label>
-                    <CountrySelect
-                      containerClassName="bg-[#f8f8f8]"
-                      inputClassName="bg-[#f8f8f8]"
-                      onChange={(_country) => handleChange(e)}
-                      onTextChange={(_txt) => console.log(_txt)}
-                      placeHolder="Select Country"
-                    />
+                    <select
+                      id="country-preference"
+                      name="countryPreference"
+                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      value={formData.countryPreference}
+                      onChange={handleChange}
+                    >
+                      {countriesList.map(countryInfo => <option key={countryInfo.id} value={countryInfo.id}>{countryInfo.name}</option>)}
+                    </select>
                   </div>
                 </div>
                 <div className="w-full px-4 md:w-1/2">
@@ -123,14 +150,16 @@ const SponsorerOccasion: React.FC = () => {
                     >
                       State Preference
                     </label>
-                    <StateSelect
-                      countryid={formData.countryPreference?.id}
-                      containerClassName="form-group"
-                      inputClassName=""
-                      onChange={(_state) => handleChange(_state)}
-                      onTextChange={(_txt) => console.log(_txt)}
-                      placeHolder="Select State"
-                    />
+                    <select
+                      id="state-preference"
+                      name="statePreference"
+                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      value={formData.statePreference}
+                      multiple 
+                      onChange={handleChange}
+                    >
+                      {stateList.map(stateInfo => <option key={stateInfo.id} value={stateInfo.id}>{stateInfo.name}</option>)}
+                    </select>
                   </div>
                 </div>
                 <div className="w-full px-4 md:w-1/2">
@@ -144,6 +173,7 @@ const SponsorerOccasion: React.FC = () => {
                     <select
                       id="age-preference"
                       name="agePreference"
+                      multiple
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.agePreference}
                       onChange={handleChange}
