@@ -30,4 +30,20 @@
   input#checkboxLabel:checked ~ .box span {
     @apply opacity-100;
   }
+
+  button {
+    @apply inline-flex items-center justify-center rounded-sm px-4 py-2 text-sm duration-300;
+  }
+
+  td {
+    @apply whitespace-nowrap px-6 py-4 text-sm;
+  }
+
+  tbody {
+    @apply divide-y divide-gray-200;
+  }
+
+  th {
+    @apply px-6 py-3 text-left text-xs font-medium tracking-wider;
+  }
 }

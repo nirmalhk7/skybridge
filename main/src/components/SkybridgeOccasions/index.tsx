@@ -11,6 +11,7 @@ const SkybridgeOccasions: React.FC = () => {
       date: "March 1st, 2025",
     },
   ]);
+  
   return (
     <div className="container py-8">
       <div
@@ -30,37 +31,37 @@ const SkybridgeOccasions: React.FC = () => {
         <table className="min-w-full divide-y divide-gray-200 dark:bg-gray-dark">
           <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider">
+              <th>
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider">
+              <th >
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider">
+              <th >
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider">
+              <th >
                 Creation Date
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {tableData.map((row, index) => (
               <tr key={index}>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                <td className="font-medium">
                   {row.name}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <button className="inline-flex items-center justify-center rounded-sm bg-gray-light px-4 py-2 text-sm text-black duration-300 hover:text-white dark:bg-[#2C303B] dark:text-white dark:hover:bg-primary">
+                <td>
+                  <button className="bg-gray-light text-black hover:text-white dark:bg-[#2C303B] dark:text-white dark:hover:bg-primary">
                     {row.type}
                   </button>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
-                  <button className="inline-flex items-center justify-center rounded-sm bg-gray-light bg-green-500 px-4 py-2 text-sm text-black duration-300">
+                <td>
+                  <button className="bg-green-500 text-black">
                     {row.status}
                   </button>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm">
+                <td>
                   {row.date}
                 </td>
               </tr>
