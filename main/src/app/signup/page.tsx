@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   // other metadata
 };
 
-const [profile, changeProfile] = useState({})
 
 const SignupPage = () => {
   return (
