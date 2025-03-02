@@ -12,6 +12,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     }
   }, []);
 
+  // TODO Set current user name and email
   const [formData, setFormData] = useState({
     name: "",
     email: "",

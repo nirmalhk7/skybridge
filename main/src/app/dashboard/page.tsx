@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const DashboardPage = () => {
-
+// TODO Change status between Fundraiser and Sponsorer
   return (
     <>
       <Breadcrumb
