@@ -1,18 +1,11 @@
 "use client";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { GetCountries, GetState } from "react-country-state-city";
 
 const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false }) => {
-  // Retrieve the user ID from localStorage (stored upon signup)
-  const [userId, setUserId] = useState<string | null>(null);
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    if (storedUserId) {
-      setUserId(storedUserId);
-    }
-  }, []);
 
-  // TODO Set current user name and email
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,6 +15,18 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     agePreference: "10-20",
     message: "",
   });
+
+  const { data: session, status } = useSession();
+  
+  useEffect((()=>{
+    if(session){
+      setFormData((prev)=>({
+        ...prev,
+        name: session.user.name,
+        email: session.user.email
+      }))
+    }
+  }),[session, status]);
 
   const [countriesList, setCountriesList] = useState<any[]>([]);
   const [stateList, setStateList] = useState<any[]>([]);
@@ -88,7 +93,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const userId = session.user.id;
     if (!userId) {
       alert("User not logged in");
       return;

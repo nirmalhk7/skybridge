@@ -1,6 +1,12 @@
 "use client";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
-import { CountrySelect, GetCountries, GetState, StateSelect } from "react-country-state-city";
+import {
+  CountrySelect,
+  GetCountries,
+  GetState,
+  StateSelect,
+} from "react-country-state-city";
 
 const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
   viewOnly = false,
@@ -14,6 +20,18 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     agePreference: "10-20",
     message: "",
   });
+
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      setFormData((prev) => ({
+        ...prev,
+        name: session.user.name,
+        email: session.user.email,
+      }));
+    }
+  }, [session, status]);
 
   const [countriesList, setCountriesList] = useState([]);
   const [stateList, setStateList] = useState([]);
@@ -223,7 +241,6 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
                       Updates
                     </h4>
-                    
                   </>
                 )}
               </div>

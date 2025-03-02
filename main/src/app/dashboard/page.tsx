@@ -9,13 +9,10 @@ export const metadata: Metadata = {
 };
 
 const DashboardPage = () => {
+  
 // TODO Change status between Fundraiser and Sponsorer
   return (
     <>
-      <Breadcrumb
-        pageName="Skybridge Dashboard"
-        description="You're using a Fundraiser account"
-      />
       <SkybridgeOccasions/>
     </>
   );
