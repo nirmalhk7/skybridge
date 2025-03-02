@@ -109,10 +109,11 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
         const searchResultFilter = searchResults.find(result => result.occasion.id === occasionId);
         const fundraiserUserId = searchResultFilter ? searchResultFilter.userId : null;
 
+        // This flip here is deliberate
         const raw = JSON.stringify({
-          sponsorerId: session.user.id,
-          fundraiserId: fundraiserUserId,
-          amountInEther: "1",
+          fundraiserId: session.user.id,
+          sponsorerId: fundraiserUserId,
+          amountInEther: "15",
         });
 
         const requestOptions: RequestInit = {
