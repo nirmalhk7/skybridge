@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../.tmp/db.sqlite"
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
+  id        String      @id @map("_id")
   name      String
   email     String      @unique
   password  String
@@ -20,20 +20,20 @@ model User {
 }
 
 model Fundraiser {
-  id          Int         @id @default(autoincrement())
-  userId      Int         @unique
+  id          String      @id @map("_id")
+  userId      String      @unique
   user        User        @relation(fields: [userId], references: [id])
   type        FundraiseType
   country     String
   state       String
   ageGroup    String
   pitch       String
-  tags        Tag[]       @relation("FundraiserTags")
-  opportunities Opportunity[]
+  opportunities OpportunityTag[]
+  fundraiserTags FundraiserTag[]
 }
 
 model Sponsorer {
-  id          Int         @id @default(autoincrement())
+  id          String      @id @map("_id")
   userId      Int         @unique
   user        User        @relation(fields: [userId], references: [id])
   type        FundraiseType
@@ -44,19 +44,36 @@ model Sponsorer {
 }
 
 model Opportunity {
-  id          Int         @id @default(autoincrement())
-  fundraiserId Int
-  fundraiser  Fundraiser  @relation(fields: [fundraiserId], references: [id])
-  tags        Tag[]       @relation("OpportunityTags")
-  score       Float
+  id          String      @id @map("_id")
+  fundraiser  Fundraiser  @relation(fields: [id], references: [id])
+  opportunityTags OpportunityTag[]
+  score           Float
+  tags            OpportunityTag[]
 }
 
 model Tag {
   id          Int         @id @default(autoincrement())
   name        String      @unique
-  fundraisers Fundraiser[] @relation("FundraiserTags")
+  fundraisers FundraiserTag[]
   sponsorers  Sponsorer[] @relation("SponsorerTags")
   opportunities Opportunity[] @relation("OpportunityTags")
+  opportunityTags OpportunityTag[]
+}
+
+model FundraiserTag {
+  id          String      @id @map("_id")
+  fundraiser  Fundraiser  @relation(fields: [fundraiserId], references: [id])
+  fundraiserId String
+  tag         Tag         @relation(fields: [tagId], references: [id])
+  tagId       Int
+}
+
+model OpportunityTag {
+  id            String      @id @map("_id")
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id])
+  opportunityId Int
+  tag           Tag         @relation(fields: [tagId], references: [id])
+  tagId         Int
 }
 
 enum Role {
