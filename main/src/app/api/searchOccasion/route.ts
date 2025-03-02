@@ -4,14 +4,16 @@ import clientPromise from "@/lib/mongodbClientPromise";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const agePreference = url.searchParams.get("agePreference");
-    const countryPreference = url.searchParams.get("countryPreference");
-    const statePreference = url.searchParams.get("statePreference");
-    const typePreference = url.searchParams.get("typePreference");
+    const searchParams = url.searchParams;
+    const query: any = {};
 
-    if (!agePreference || !countryPreference || !statePreference || !typePreference) {
+    searchParams.forEach((value, key) => {
+      query[`occasions.${key}`] = value;
+    });
+
+    if (Object.keys(query).length === 0) {
       return NextResponse.json(
-        { error: "Missing one or more search parameters" },
+        { error: "No search parameters provided" },
         { status: 400 },
       );
     }
@@ -22,13 +24,7 @@ export async function GET(req: Request) {
 
     const searchResults = await users.aggregate([
       { $unwind: "$occasions" },
-      { $match: {
-          "occasions.agePreference": agePreference,
-          "occasions.countryPreference": countryPreference,
-          "occasions.statePreference": statePreference,
-          "occasions.typePreference": typePreference
-        }
-      },
+      { $match: query },
       { $project: { _id: 0, userId: "$_id", occasion: "$occasions" } }
     ]).toArray();
 

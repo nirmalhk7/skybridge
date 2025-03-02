@@ -9,14 +9,6 @@ import { useSession } from "next-auth/react";
 const SkybridgeOccasions: React.FC = () => {
   const { data: session, status } = useSession();
   const [accountType, setAccountType] = useState("");
-
-  useEffect(() => {
-    console.log(session);
-    if (session) {
-      setAccountType(session.user.role.charAt(0).toUpperCase() + session.user.role.slice(1));
-    }
-  }, [session, status]);
-
   const [tableData, setTableData] = useState([
     {
       id: "23453647534",
@@ -26,6 +18,20 @@ const SkybridgeOccasions: React.FC = () => {
       date: "March 1st, 2025",
     },
   ]);
+
+  useEffect(() => {
+    console.log(session);
+    if (session) {
+      setAccountType(
+        session.user.role.charAt(0).toUpperCase() + session.user.role.slice(1),
+      );
+    }
+    if(accountType == "Sponsorer"){
+      
+    } else if(accountType === "Fundraiser"){
+
+    }
+  }, [session, status]);
 
   return (
     <>
