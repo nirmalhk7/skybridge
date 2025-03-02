@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../.tmp/db.sqlite"
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
 }
 
 model User {
