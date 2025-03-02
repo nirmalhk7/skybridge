@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const SkybridgeSignIn = () => {
   const router = useRouter();
@@ -18,14 +19,13 @@ const SkybridgeSignIn = () => {
 
     try {
       // POST to /api/signin
-      const res = await fetch("/api/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Sign in failed");
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+      if (res?.error) {
+        throw new Error(res.error || "Sign in failed");
       }
       // On success, navigate to /dashboard
       router.push("/dashboard");
