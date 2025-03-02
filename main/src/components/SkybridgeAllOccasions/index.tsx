@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
+
 const SkybridgeOccasions: React.FC = () => {
+  
   const [tableData, setTableData] = useState([
     {
+      id: "23453647534",
       name: "Sample Name",
       type: "Scholarship",
       status: "Approved",
@@ -25,7 +30,7 @@ const SkybridgeOccasions: React.FC = () => {
             </h3>
           </div>
           <div>
-            <button className="bg-primary p-4 text-white">New Occasion</button>
+            <Link href="/fundraiser/new" className="bg-primary p-4 text-white">New Occasion</Link>
           </div>
         </div>
         <table className="min-w-full divide-y divide-gray-200 dark:bg-gray-dark">
@@ -41,7 +46,10 @@ const SkybridgeOccasions: React.FC = () => {
                 Status
               </th>
               <th >
-                Creation Date
+                Created At
+              </th>
+              <th>
+                
               </th>
             </tr>
           </thead>
@@ -63,6 +71,9 @@ const SkybridgeOccasions: React.FC = () => {
                 </td>
                 <td>
                   {row.date}
+                </td>
+                <td>
+                  <Link href={`/fundraiser/${row.id}`}>More</Link>
                 </td>
               </tr>
             ))}
