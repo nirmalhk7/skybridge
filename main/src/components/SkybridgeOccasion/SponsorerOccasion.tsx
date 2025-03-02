@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { CountrySelect, GetCountries, GetState, StateSelect } from "react-country-state-city";
 
-const SponsorerOccasion: React.FC = () => {
+const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
+  viewOnly = false,
+}) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "",
-    statePreference: [],
-    agePreference: [],
+    countryPreference: "usa",
+    statePreference: "california",
+    agePreference: "10-20",
     message: "",
   });
 
@@ -27,27 +29,16 @@ const SponsorerOccasion: React.FC = () => {
       });
   }, [formData.countryPreference]);
 
-
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => {
-    const { name, value, multiple, options } = e.target;
-    if (multiple) {
-      const values = Array.from(options)
-        .filter(option => option.selected)
-        .map(option => option.value);
-      setFormData({
-        ...formData,
-        [name]: values,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -80,6 +71,7 @@ const SponsorerOccasion: React.FC = () => {
                       placeholder="Enter your name"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.name}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     />
                   </div>
@@ -98,6 +90,7 @@ const SponsorerOccasion: React.FC = () => {
                       placeholder="Enter your email"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.email}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     />
                   </div>
@@ -115,6 +108,7 @@ const SponsorerOccasion: React.FC = () => {
                       name="typePreference"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.typePreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
                       <option value="scholarships">Scholarships</option>
@@ -134,11 +128,16 @@ const SponsorerOccasion: React.FC = () => {
                     <select
                       id="country-preference"
                       name="countryPreference"
-                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.countryPreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
-                      {countriesList.map(countryInfo => <option key={countryInfo.id} value={countryInfo.id}>{countryInfo.name}</option>)}
+                      {countriesList.map((countryInfo) => (
+                        <option key={countryInfo.id} value={countryInfo.id}>
+                          {countryInfo.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -153,12 +152,16 @@ const SponsorerOccasion: React.FC = () => {
                     <select
                       id="state-preference"
                       name="statePreference"
-                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.statePreference}
-                      multiple 
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
-                      {stateList.map(stateInfo => <option key={stateInfo.id} value={stateInfo.id}>{stateInfo.name}</option>)}
+                      {stateList.map((stateInfo) => (
+                        <option key={stateInfo.id} value={stateInfo.id}>
+                          {stateInfo.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -173,9 +176,9 @@ const SponsorerOccasion: React.FC = () => {
                     <select
                       id="age-preference"
                       name="agePreference"
-                      multiple
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.agePreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
                       {Array.from({ length: 7 }, (_, i) => {
@@ -204,15 +207,25 @@ const SponsorerOccasion: React.FC = () => {
                       placeholder="Enter your Message"
                       className="border-stroke w-full resize-none rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                       value={formData.message}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     ></textarea>
                   </div>
                 </div>
-                <div className="w-full px-4">
-                  <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
-                    Submit
-                  </button>
-                </div>
+                {!viewOnly ? (
+                  <div className="w-full px-4">
+                    <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
+                      Submit
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
+                      Updates
+                    </h4>
+                    
+                  </>
+                )}
               </div>
             </form>
           </div>

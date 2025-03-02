@@ -228,7 +228,6 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
                       Updates
                     </h4>
-                    
                   </>
                 )}
               </div>

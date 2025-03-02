@@ -15,7 +15,7 @@ const SponsorerStatus = () => {
         description="View status of current / previous fundraising opportunity"
         breadcrumbs={[{name:"Dashboard",href:"/dashboard"},{name:"New Fundraise Opportunity",href:"/fundraiser/new"}]}
       />
-      <SponsorerOccasion />
+      <SponsorerOccasion viewOnly={true} />
     </>
   );
 };
