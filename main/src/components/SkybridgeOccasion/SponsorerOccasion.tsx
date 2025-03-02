@@ -25,7 +25,6 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
   const [searchResults, setSearchResults] = useState([]);
 
   const { data: session, status } = useSession();
-
   useEffect(() => {
     if (session) {
       setFormData((prev) => ({
@@ -85,6 +84,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
       occasionId: occasionId,
       occasionData: {
         status: "Approved",
+        sponsorerId: session.user.id,
       },
     });
 
