@@ -9,7 +9,7 @@ const SkybridgeSignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Fundraiser"); // Default role
+  const [role, setRole] = useState("Fundraiser");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
@@ -23,9 +23,12 @@ const SkybridgeSignUp = () => {
         body: JSON.stringify({ name, email, password, role }),
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Sign up failed");
+          const data = await res.json();
+          throw new Error(data.error || "Sign up failed");
       }
+    const data = await res.json();  
+    localStorage.setItem("userId", data.userId);
+
       router.push("/dashboard");
     } catch (error: any) {
       setErrorMsg(error.message);

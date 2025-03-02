@@ -1,37 +1,52 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  CountrySelect,
-  GetCountries,
-  GetState,
-  StateSelect,
-} from "react-country-state-city";
+import { GetCountries, GetState } from "react-country-state-city";
 
 const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
   viewOnly = false,
 }) => {
+  // Retrieve the user ID from localStorage (which should be stored upon signup)
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setUserId(storedUserId);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "usa",
-    statePreference: "california",
+    countryPreference: "",
+    statePreference: "",
     agePreference: "10-20",
     message: "",
   });
 
-  const [countriesList, setCountriesList] = useState([]);
-  const [stateList, setStateList] = useState([]);
+  const [countriesList, setCountriesList] = useState<any[]>([]);
+  const [stateList, setStateList] = useState<any[]>([]);
+
+  // Load countries on mount
   useEffect(() => {
     GetCountries().then((result) => {
       setCountriesList(result);
+      if (result.length > 0 && !formData.countryPreference) {
+        setFormData((prev) => ({ ...prev, countryPreference: result[0].id.toString() }));
+      }
     });
   }, []);
+
+  // Load states when countryPreference changes
   useEffect(() => {
-    if (formData.countryPreference)
-      GetState(parseInt(formData.countryPreference)).then((result) => {
+    if (formData.countryPreference) {
+      GetState(Number(formData.countryPreference)).then((result) => {
         setStateList(result);
+        if (result.length > 0 && !formData.statePreference) {
+          setFormData((prev) => ({ ...prev, statePreference: result[0].id.toString() }));
+        }
       });
+    }
   }, [formData.countryPreference]);
 
   const handleChange = (
@@ -40,17 +55,52 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
     >,
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log(formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!userId) {
+    alert("User not logged in");
+    return;
+  }
+
+  const payload = {
+    userId,
+    occasionData: formData,
   };
+
+  try {
+    const response = await fetch("/api/addOccasion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      alert("Occasion added successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        typePreference: "scholarships",
+        countryPreference: formData.countryPreference,
+        statePreference: formData.statePreference,
+        agePreference: "10-20",
+        message: "",
+      });
+    } else {
+      const data = await response.json();
+      alert(`Error: ${data.message}`);
+    }
+  } catch (error) {
+    console.error("Submission error:", error);
+    alert("Failed to submit the occasion");
+  }
+};
+
 
   return (
     <div className="container">
@@ -224,11 +274,9 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     </button>
                   </div>
                 ) : (
-                  <>
-                    <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
-                      Updates
-                    </h4>
-                  </>
+                  <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
+                    Updates
+                  </h4>
                 )}
               </div>
             </form>
