@@ -8,29 +8,22 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext({});
-const AUTHZ = {
-    Fundraiser: ["/dashboard"],
-    Sponsorer: ["/dashboard"],
-    PUBLIC: ["/","/signin","/signup"]
-}
+const AuthZ_Public=["/","/signin","/signup"]
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-      const [username, setUsername]= useState(null);
       const { data: session, status } = useSession();
       const currentRoute = usePathname();
 
     
       useEffect(()=>{
         if(status==='authenticated'){
-            console.log('authenticated',session,  currentRoute);
-            if(currentRoute in AUTHZ[session.user.role]){
-                setUsername(session.user.name);
+            // If authenticated and on public route, redirect to dashboard
+            if(AuthZ_Public.includes(currentRoute)){
+                redirect('/dashboard')
             }
-            else {
-                // redirect('/dashboard')
-            }
-        } else if(status==='unauthenticated' && !AUTHZ.PUBLIC.includes(currentRoute)) {
-          redirect('/signin')
+        } else if(status==='unauthenticated' && !AuthZ_Public.includes(currentRoute)) {
+            // If unauthenticated and not on public route, redirect to signIn
+            redirect('/')
         }
       },[session, status]);
 
