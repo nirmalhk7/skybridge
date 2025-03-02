@@ -22,15 +22,34 @@ export async function GET(req: Request) {
     const db = client.db("skybridge-cluster");
     const users = db.collection("users");
 
-    const searchResults = await users.aggregate([
-      { $unwind: "$occasions" },
-      { $match: query },
-      { $project: { _id: 0, userId: "$_id", occasion: "$occasions" } }
-    ]).toArray();
+    const searchResults = await users
+      .aggregate([
+        { $unwind: "$occasions" },
+        {
+          $match: query,
+        },
+        {
+          $addFields: {
+            scoreVal: { $arrayElemAt: ["$scores", 0] },
+          },
+        },
+        { $sort: { scoreVal: -1 } },
+        {
+          $project: {
+            _id: 0,
+            userId: "$_id",
+            occasion: {
+              $mergeObjects: [
+                "$occasions",
+                { score: { $ifNull: ["$scoreVal", "N/A"] } },
+              ],
+            },
+          },
+        },
+      ])
+      .toArray();
 
-    return NextResponse.json(searchResults,
-      { status: 200 },
-    );
+    return NextResponse.json(searchResults, { status: 200 });
   } catch (error) {
     console.error("Error searching occasions:", error);
     return NextResponse.json(
