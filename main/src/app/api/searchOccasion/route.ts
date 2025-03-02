@@ -9,7 +9,12 @@ export async function GET(req: Request) {
     const statePreference = url.searchParams.get("statePreference");
     const typePreference = url.searchParams.get("typePreference");
 
-    if (!agePreference || !countryPreference || !statePreference || !typePreference) {
+    if (
+      !agePreference ||
+      !countryPreference ||
+      !statePreference ||
+      !typePreference
+    ) {
       return NextResponse.json(
         { error: "Missing one or more search parameters" },
         { status: 400 },
@@ -20,21 +25,39 @@ export async function GET(req: Request) {
     const db = client.db("skybridge-cluster");
     const users = db.collection("users");
 
-    const searchResults = await users.aggregate([
-      { $unwind: "$occasions" },
-      { $match: {
-          "occasions.agePreference": agePreference,
-          "occasions.countryPreference": countryPreference,
-          "occasions.statePreference": statePreference,
-          "occasions.typePreference": typePreference
-        }
-      },
-      { $project: { _id: 0, userId: "$_id", occasion: "$occasions" } }
-    ]).toArray();
+    const searchResults = await users
+      .aggregate([
+        { $unwind: "$occasions" },
+        {
+          $match: {
+            "occasions.agePreference": agePreference,
+            "occasions.countryPreference": countryPreference,
+            "occasions.statePreference": statePreference,
+            "occasions.typePreference": typePreference,
+          },
+        },
+        {
+          $addFields: {
+            scoreVal: { $arrayElemAt: ["$scores", 0] },
+          },
+        },
+        { $sort: { scoreVal: -1 } },
+        {
+          $project: {
+            _id: 0,
+            userId: "$_id",
+            occasion: {
+              $mergeObjects: [
+                "$occasions",
+                { score: { $ifNull: ["$scoreVal", "N/A"] } },
+              ],
+            },
+          },
+        },
+      ])
+      .toArray();
 
-    return NextResponse.json(searchResults,
-      { status: 200 },
-    );
+    return NextResponse.json(searchResults, { status: 200 });
   } catch (error) {
     console.error("Error searching occasions:", error);
     return NextResponse.json(
