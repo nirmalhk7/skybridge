@@ -10,8 +10,8 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "",
-    statePreference: "",
+    countryPreference: "230",
+    statePreference: "1450",
     agePreference: "10-20",
     message: "",
   });
@@ -33,6 +33,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
 
   // State for GPT response and modal visibility
   const [gptResponse, setGptResponse] = useState("");
+  // TODO pranay: remove this modal
   const [showModal, setShowModal] = useState(false);
 
   // Load countries on mount

@@ -1,5 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import {
   CountrySelect,
@@ -15,11 +16,13 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "usa",
-    statePreference: "california",
+    countryPreference: "233",
+    statePreference: "1450",
     agePreference: "10-20",
     message: "",
   });
+
+  const [searchResults, setSearchResults] = useState([]);
 
   const { data: session, status } = useSession();
 
@@ -35,16 +38,33 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
 
   const [countriesList, setCountriesList] = useState([]);
   const [stateList, setStateList] = useState([]);
+
+  // Load countries on mount
   useEffect(() => {
     GetCountries().then((result) => {
       setCountriesList(result);
+      if (result.length > 0 && !formData.countryPreference) {
+        setFormData((prev) => ({
+          ...prev,
+          countryPreference: result[0].id.toString(),
+        }));
+      }
     });
   }, []);
+
+  // Load states when countryPreference changes
   useEffect(() => {
-    if (formData.countryPreference)
-      GetState(parseInt(formData.countryPreference)).then((result) => {
+    if (formData.countryPreference) {
+      GetState(Number(formData.countryPreference)).then((result) => {
         setStateList(result);
+        if (result.length > 0 && !formData.statePreference) {
+          setFormData((prev) => ({
+            ...prev,
+            statePreference: result[0].id.toString(),
+          }));
+        }
       });
+    }
   }, [formData.countryPreference]);
 
   const handleChange = (
@@ -62,7 +82,21 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
-    console.log(formData);
+    const searchParams = new URLSearchParams({
+      agePreference: formData.agePreference,
+      countryPreference: formData.countryPreference,
+      statePreference: formData.statePreference,
+      typePreference: formData.typePreference,
+    });
+
+    fetch(`http://localhost:3000/api/searchOccasion?${searchParams.toString()}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setSearchResults(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching search results:", error);
+      });
   };
 
   return (
@@ -212,39 +246,46 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                   </div>
                 </div>
                 <div className="w-full px-4">
-                  <div className="mb-8">
-                    <label
-                      htmlFor="message"
-                      className="mb-3 block text-sm font-medium text-dark dark:text-white"
-                    >
-                      Your Message
-                    </label>
-                    <textarea
-                      name="message"
-                      rows={5}
-                      placeholder="Enter your Message"
-                      className="border-stroke w-full resize-none rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
-                      value={formData.message}
-                      disabled={viewOnly}
-                      onChange={handleChange}
-                    ></textarea>
-                  </div>
+                  <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
+                    Search
+                  </button>
                 </div>
-                {!viewOnly ? (
-                  <div className="w-full px-4">
-                    <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
-                      Submit
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
-                      Updates
-                    </h4>
-                  </>
-                )}
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-wrap">
+        <div className="w-full px-4">
+          <div
+            className="mb-12 rounded-sm bg-white px-8 py-11 shadow-three dark:bg-gray-dark sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]"
+            data-wow-delay=".15s"
+          >
+            <h3>Search Results</h3>
+            <table className="min-w-full divide-y divide-gray-200 dark:bg-gray-dark">
+              <thead>
+                <tr>
+                  <th>userid</th>
+                  <th>message</th>
+                  <th>status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {searchResults.map((row, index) => (
+                  <tr key={index}>
+                    <td>
+                      <button className="bg-gray-light text-black hover:text-white dark:bg-[#2C303B] dark:text-white dark:hover:bg-primary">
+                        {row.userId}
+                      </button>
+                    </td>
+                    <td>
+                        {row.occasion.message}
+                    </td>
+                    <td><button  className="bg-gray text-white">{row.status ? "Approved": "Approve?"}</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
