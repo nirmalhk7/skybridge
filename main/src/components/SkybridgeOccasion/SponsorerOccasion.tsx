@@ -310,7 +310,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                         {row.userId}
                     </button>
                     </td>
-                    <td>{row.occasion.message}</td>
+                    <td className="whitespace-normal break-words max-w-xs">{row.occasion.message}</td>
                     <td>{row.occasion.score}</td>
                     <td>
                     <button
