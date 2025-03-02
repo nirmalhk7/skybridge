@@ -1,6 +1,6 @@
 # Skybridge
 
-Skybridge is a Peer to Peer Sponsorship Matchmaking Platform designed to connect sponsors with individuals or organizations seeking sponsorship. Our platform aims to simplify the process of finding and securing sponsorships by providing a seamless and efficient matchmaking service.
+Skybridge is a Peer to Peer AI Sponsorship Matchmaking Platform designed to connect sponsors with individuals or organizations seeking sponsorship. Our platform aims to simplify the process of finding and securing sponsorships by providing a seamless and efficient matchmaking service.
 
 ## Features
 
