@@ -25,7 +25,7 @@ const FundraiserStatus = ({
               { name: "Opportunity Status", href: "/fundraiser/new" },
             ]}
           />
-          <FundraiserOccasion  />
+          <FundraiserOccasion viewOnly={true} />
         </>
       )).catch(e=>redirect("/dashboard"))}
     </>

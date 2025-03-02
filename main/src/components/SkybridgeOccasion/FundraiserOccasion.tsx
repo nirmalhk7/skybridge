@@ -1,8 +1,15 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { CountrySelect, GetCountries, GetState, StateSelect } from "react-country-state-city";
+import {
+  CountrySelect,
+  GetCountries,
+  GetState,
+  StateSelect,
+} from "react-country-state-city";
 
-const FundraiserOccasion: React.FC = () => {
+const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
+  viewOnly = false,
+}) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,7 +33,6 @@ const FundraiserOccasion: React.FC = () => {
         setStateList(result);
       });
   }, [formData.countryPreference]);
-
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -70,6 +76,7 @@ const FundraiserOccasion: React.FC = () => {
                       placeholder="Enter your name"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.name}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     />
                   </div>
@@ -88,6 +95,7 @@ const FundraiserOccasion: React.FC = () => {
                       placeholder="Enter your email"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.email}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     />
                   </div>
@@ -105,6 +113,7 @@ const FundraiserOccasion: React.FC = () => {
                       name="typePreference"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.typePreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
                       <option value="scholarships">Scholarships</option>
@@ -124,11 +133,16 @@ const FundraiserOccasion: React.FC = () => {
                     <select
                       id="country-preference"
                       name="countryPreference"
-                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.countryPreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
-                      {countriesList.map(countryInfo => <option key={countryInfo.id} value={countryInfo.id}>{countryInfo.name}</option>)}
+                      {countriesList.map((countryInfo) => (
+                        <option key={countryInfo.id} value={countryInfo.id}>
+                          {countryInfo.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -143,11 +157,16 @@ const FundraiserOccasion: React.FC = () => {
                     <select
                       id="state-preference"
                       name="statePreference"
-                      className="bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary border-stroke"
+                      className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.statePreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
-                      {stateList.map(stateInfo => <option key={stateInfo.id} value={stateInfo.id}>{stateInfo.name}</option>)}
+                      {stateList.map((stateInfo) => (
+                        <option key={stateInfo.id} value={stateInfo.id}>
+                          {stateInfo.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -164,6 +183,7 @@ const FundraiserOccasion: React.FC = () => {
                       name="agePreference"
                       className="border-stroke bg-[#f8f8f8] focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:focus:border-primary"
                       value={formData.agePreference}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     >
                       {Array.from({ length: 7 }, (_, i) => {
@@ -192,15 +212,25 @@ const FundraiserOccasion: React.FC = () => {
                       placeholder="Enter your Message"
                       className="border-stroke w-full resize-none rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                       value={formData.message}
+                      disabled={viewOnly}
                       onChange={handleChange}
                     ></textarea>
                   </div>
                 </div>
-                <div className="w-full px-4">
-                  <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
-                    Submit
-                  </button>
-                </div>
+                {!viewOnly ? (
+                  <div className="w-full px-4">
+                    <button className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
+                      Submit
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h4 className="mb-3 text-center text-lg font-bold text-black dark:text-white sm:text-lg">
+                      Updates
+                    </h4>
+                    
+                  </>
+                )}
               </div>
             </form>
           </div>
