@@ -2,10 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { GetCountries, GetState } from "react-country-state-city";
 
-const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
-  viewOnly = false,
-}) => {
-  // Retrieve the user ID from localStorage (which should be stored upon signup)
+const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false }) => {
+  // Retrieve the user ID from localStorage (stored upon signup)
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -14,6 +12,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
     }
   }, []);
 
+  // TODO Set current user name and email
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,12 +26,19 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
   const [countriesList, setCountriesList] = useState<any[]>([]);
   const [stateList, setStateList] = useState<any[]>([]);
 
+  // State for GPT response and modal visibility
+  const [gptResponse, setGptResponse] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
   // Load countries on mount
   useEffect(() => {
     GetCountries().then((result) => {
       setCountriesList(result);
       if (result.length > 0 && !formData.countryPreference) {
-        setFormData((prev) => ({ ...prev, countryPreference: result[0].id.toString() }));
+        setFormData((prev) => ({
+          ...prev,
+          countryPreference: result[0].id.toString(),
+        }));
       }
     });
   }, []);
@@ -43,7 +49,10 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
       GetState(Number(formData.countryPreference)).then((result) => {
         setStateList(result);
         if (result.length > 0 && !formData.statePreference) {
-          setFormData((prev) => ({ ...prev, statePreference: result[0].id.toString() }));
+          setFormData((prev) => ({
+            ...prev,
+            statePreference: result[0].id.toString(),
+          }));
         }
       });
     }
@@ -52,55 +61,82 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    >
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  if (!userId) {
-    alert("User not logged in");
-    return;
-  }
-
-  const payload = {
-    userId,
-    occasionData: formData,
+  // Function to fetch GPT response without streaming
+  const fetchGptResponse = async (occasionMessage: string) => {
+    try {
+      const encodedMessage = encodeURIComponent(occasionMessage);
+      const response = await fetch(`/api/gptHandler?message=${encodedMessage}`);
+      const data = await response.json();
+      console.log("Fetched GPT response data:", data);
+      if (response.ok) {
+        setGptResponse(data.gptResponse);
+      } else {
+        console.error("Error fetching GPT response:", data.error);
+        setGptResponse("Error fetching GPT response");
+      }
+    } catch (error) {
+      console.error("Error fetching GPT response:", error);
+      setGptResponse("Error fetching GPT response");
+    }
   };
 
-  try {
-    const response = await fetch("/api/addOccasion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (response.ok) {
-      alert("Occasion added successfully!");
-      setFormData({
-        name: "",
-        email: "",
-        typePreference: "scholarships",
-        countryPreference: formData.countryPreference,
-        statePreference: formData.statePreference,
-        agePreference: "10-20",
-        message: "",
-      });
-    } else {
-      const data = await response.json();
-      alert(`Error: ${data.message}`);
+    if (!userId) {
+      alert("User not logged in");
+      return;
     }
-  } catch (error) {
-    console.error("Submission error:", error);
-    alert("Failed to submit the occasion");
-  }
-};
 
+    // Capture the message before resetting the form
+    const occasionMessage = formData.message;
+
+    const payload = {
+      userId,
+      occasionData: formData,
+    };
+
+    try {
+      const response = await fetch("/api/addOccasion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        alert("Occasion added successfully!");
+        setFormData({
+          name: "",
+          email: "",
+          typePreference: "scholarships",
+          countryPreference: formData.countryPreference,
+          statePreference: formData.statePreference,
+          agePreference: "10-20",
+          message: "",
+        });
+
+        // Initialize GPT response state and display modal
+        setGptResponse("");
+        setShowModal(true);
+        console.log("Modal shown. Starting GPT response fetch.");
+        fetchGptResponse(occasionMessage);
+      } else {
+        const data = await response.json();
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert("Failed to submit the occasion");
+    }
+  };
 
   return (
     <div className="container">
@@ -112,6 +148,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
           >
             <form onSubmit={handleSubmit}>
               <div className="-mx-4 flex flex-wrap">
+                {/* Organization Name */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -131,6 +168,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     />
                   </div>
                 </div>
+                {/* Organization Email */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -150,6 +188,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     />
                   </div>
                 </div>
+                {/* Type Preference */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -172,6 +211,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     </select>
                   </div>
                 </div>
+                {/* Country Preference */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -196,6 +236,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     </select>
                   </div>
                 </div>
+                {/* State Preference */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -220,6 +261,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     </select>
                   </div>
                 </div>
+                {/* Age Preference */}
                 <div className="w-full px-4 md:w-1/2">
                   <div className="mb-8">
                     <label
@@ -248,6 +290,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
                     </select>
                   </div>
                 </div>
+                {/* Message */}
                 <div className="w-full px-4">
                   <div className="mb-8">
                     <label
@@ -283,6 +326,23 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({
           </div>
         </div>
       </div>
+      {/* Modal for displaying OpenAI response */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-11/12 max-w-lg">
+            <h2 className="text-xl font-bold mb-4">OpenAI Response</h2>
+            <div className="mb-4 whitespace-pre-wrap" style={{ color: 'black' }}>
+              {gptResponse || "Loading..."}
+            </div>
+            <button
+              className="bg-primary text-white px-4 py-2 rounded"
+              onClick={() => setShowModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
