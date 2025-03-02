@@ -62,8 +62,11 @@ export async function PUT(req: Request) {
       );
     }
 
+    // Query the user's email
+    const updatedUserData = await users.findOne({ _id: userObjectId }, { projection: { email: 1 } });
+
     return NextResponse.json(
-      { success: true, message: "Occasion updated successfully" },
+      { success: true, message: "Occasion updated successfully", email: updatedUserData.email },
       { status: 200 },
     );
   } catch (error) {

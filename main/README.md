@@ -8,7 +8,6 @@ Skybridge is a Peer to Peer Sponsorship Matchmaking Platform designed to connect
 - **Profile Management**: Create and manage detailed profiles to showcase your needs or offerings.
 - **Secure Communication**: Communicate securely within the platform to discuss sponsorship details.
 - **Advanced Search**: Use advanced search filters to find the perfect match for your sponsorship needs.
-- **Notifications**: Stay updated with real-time notifications about new matches and messages.
 
 ## Getting Started
 

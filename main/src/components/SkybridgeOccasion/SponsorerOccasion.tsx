@@ -79,6 +79,32 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     });
   };
 
+  const handleApproval = (e, occasionId) => {
+    e.preventDefault();
+    const raw = JSON.stringify({
+      occasionId: occasionId,
+      occasionData: {
+        status: "Approved",
+      },
+    });
+
+    fetch("/api/updateOccasion", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: raw,
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        alert(
+          `Congratulations! You are matched with a user. Please contact them at ${result.email}`,
+        );
+        handleSubmit(e); // Call handleSubmit again
+      })
+      .catch((error) => console.error("Error updating occasion:", error));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
@@ -278,10 +304,17 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                         {row.userId}
                       </button>
                     </td>
+                    <td>{row.occasion.message}</td>
                     <td>
-                        {row.occasion.message}
+                      <button
+                        onClick={(e) => handleApproval(e, row.occasion.id)}
+                        className="bg-white text-black"
+                      >
+                        {row.occasion.status === "Searching"
+                          ? "Approve?"
+                          : "Approved"}
+                      </button>
                     </td>
-                    <td><button  className="bg-gray text-white">{row.status ? "Approved": "Approve?"}</button></td>
                   </tr>
                 ))}
               </tbody>
