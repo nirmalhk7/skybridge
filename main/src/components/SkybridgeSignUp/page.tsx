@@ -10,6 +10,7 @@ const SkybridgeSignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
   const [role, setRole] = useState("Fundraiser");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -94,6 +95,20 @@ const SkybridgeSignUp = () => {
                     placeholder="Enter your Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none"
+                    required
+                  />
+                </div>
+                <div className="mb-8">
+                  <label htmlFor="password" className="mb-3 block text-sm text-dark dark:text-white">
+                    Your Web3 Address
+                  </label>
+                  <input
+                    type="text"
+                    name="accountAddress"
+                    placeholder="Enter your Web3 Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
                     className="w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none"
                     required
                   />

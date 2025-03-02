@@ -54,7 +54,7 @@ const SkybridgeOccasions: React.FC = () => {
             name: e.name,
             type: e.typePreference,
             status: e.status,
-            date: "March 2nd, 2025",
+            date: e.createdDate,
           })))
           .then((result) => setTableData(result))
           .catch((error) => console.error(error));

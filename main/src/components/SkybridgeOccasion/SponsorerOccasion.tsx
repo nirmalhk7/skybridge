@@ -101,33 +101,57 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
           `Congratulations! You are matched with a user. Please contact them at ${result.email}`,
         );
         handleSubmit(e); // Call handleSubmit again
+        return result;
+      })
+      .then((result) => {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        const searchResultFilter = searchResults.find(result => result.occasion.id === occasionId);
+        const fundraiserUserId = searchResultFilter ? searchResultFilter.userId : null;
+
+        const raw = JSON.stringify({
+          sponsorerId: session.user.id,
+          fundraiserId: fundraiserUserId,
+          amountInEther: "1",
+        });
+
+        const requestOptions: RequestInit = {
+          method: "POST",
+          headers: myHeaders,
+          body: raw
+        };
+
+        return fetch("/api/deployContract", requestOptions)
+          .then((response) => response.text())
+          .then((result) => console.log(result))
+          .catch((error) => console.error(error));
       })
       .catch((error) => console.error("Error updating occasion:", error));
   };
 
-    const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const searchParams = new URLSearchParams({
-        agePreference: formData.agePreference,
-        countryPreference: formData.countryPreference,
-        statePreference: formData.statePreference,
-        typePreference: formData.typePreference,
+      agePreference: formData.agePreference,
+      countryPreference: formData.countryPreference,
+      statePreference: formData.statePreference,
+      typePreference: formData.typePreference,
     });
 
     fetch(`http://localhost:3000/api/searchOccasion?${searchParams.toString()}`)
-        .then((response) => response.json())
-        .then((data) => {
+      .then((response) => response.json())
+      .then((data) => {
         if (Array.isArray(data)) {
-            setSearchResults(data);
+          setSearchResults(data);
         } else {
-            console.error("Expected an array but received:", data);
-            setSearchResults([]);
+          console.error("Expected an array but received:", data);
+          setSearchResults([]);
         }
-        })
-        .catch((error) => {
+      })
+      .catch((error) => {
         console.error("Error fetching search results:", error);
-        });
-    };
+      });
+  };
 
   return (
     <div className="container">
@@ -285,7 +309,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
           </div>
         </div>
       </div>
-       <div className="flex flex-wrap">
+      <div className="flex flex-wrap">
         <div className="w-full px-4">
           <div
             className="mb-12 rounded-sm bg-white px-8 py-11 shadow-three dark:bg-gray-dark sm:p-[55px] lg:mb-5 lg:px-8 xl:p-[55px]"
@@ -301,33 +325,37 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                   <th>status</th>
                 </tr>
               </thead>
-            <tbody>
-            {Array.isArray(searchResults) && searchResults.length > 0 ? (
-                searchResults.map((row, index) => (
-                <tr key={index}>
-                    <td>
-                    <button className="bg-gray-light text-black hover:text-white dark:bg-[#2C303B] dark:text-white dark:hover:bg-primary">
-                        {row.userId}
-                    </button>
-                    </td>
-                    <td className="whitespace-normal break-words max-w-xs">{row.occasion.message}</td>
-                    <td>{row.occasion.score}</td>
-                    <td>
-                    <button
-                        onClick={(e) => handleApproval(e, row.occasion.id)}
-                        className="bg-white text-black"
-                    >
-                        {row.occasion.status === "Searching" ? "Approve?" : "Approved"}
-                    </button>
-                    </td>
-                </tr>
-                ))
-            ) : (
-                <tr>
-                <td colSpan={4}>No search results found.</td>
-                </tr>
-            )}
-            </tbody>
+              <tbody>
+                {Array.isArray(searchResults) && searchResults.length > 0 ? (
+                  searchResults.map((row, index) => (
+                    <tr key={index}>
+                      <td>
+                        <button className="bg-gray-light text-black hover:text-white dark:bg-[#2C303B] dark:text-white dark:hover:bg-primary">
+                          {row.userId}
+                        </button>
+                      </td>
+                      <td className="max-w-xs whitespace-normal break-words">
+                        {row.occasion.message}
+                      </td>
+                      <td>{row.occasion.score}</td>
+                      <td>
+                        <button
+                          onClick={(e) => handleApproval(e, row.occasion.id)}
+                          className="bg-white text-black"
+                        >
+                          {row.occasion.status === "Searching"
+                            ? "Approve?"
+                            : "Approved"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4}>No search results found.</td>
+                  </tr>
+                )}
+              </tbody>
             </table>
           </div>
         </div>

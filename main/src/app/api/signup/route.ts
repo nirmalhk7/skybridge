@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json();
+    const data = await req.json();
 
-    if (!name || !email || !password || !role) {
+    if (!data.name || !data.email || !data.password || !data.role) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const db = client.db("skybridge-cluster");
     const users = db.collection("users");
 
-    const existingUser = await users.findOne({ email });
+    const existingUser = await users.findOne({ email: data.email });
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
@@ -25,13 +25,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    data.password = await bcrypt.hash(data.password, 10);
 
     const result = await users.insertOne({
-      name,
-      email,
-      password: hashedPassword,
-      role,
+      ...data,
       createdAt: new Date(),
     });
 

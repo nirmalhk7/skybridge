@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     const occasionWithIdAndStatus = {
       ...occasionData,
       id: occasionId,
+      createdDate: new Date(),
       status: occasionData.status || "Searching",
     };
 
