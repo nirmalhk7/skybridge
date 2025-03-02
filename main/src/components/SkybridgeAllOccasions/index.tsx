@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 
 const SkybridgeOccasions: React.FC = () => {
-  
+
   const [tableData, setTableData] = useState([
     {
       id: "23453647534",

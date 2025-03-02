@@ -14,6 +14,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    getSession().then(sess => setSession(sess));
+  }, []);
+
   return (
     <html suppressHydrationWarning lang="en">
       {/*
@@ -22,8 +28,9 @@ export default function RootLayout({
       */}
       <head />
 
+
       <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
-        <Providers>
+        <Providers session={session}>
           <Header />
           {children}
           <Footer />
@@ -34,4 +41,6 @@ export default function RootLayout({
   );
 }
 
-import { Providers } from "./providers";
+import { Providers } from "./providers";import { getSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+

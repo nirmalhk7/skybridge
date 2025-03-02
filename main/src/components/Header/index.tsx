@@ -4,9 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeToggler from "./ThemeToggler";
-import menuData from "./menuData";
+import { useSession } from "next-auth/react";
 
 const Header = () => {
+  const { data: session, status } = useSession()
+  console.log(session, status);
+
   // Navbar toggle
   const [navbarOpen, setNavbarOpen] = useState(false);
   const navbarToggleHandler = () => {

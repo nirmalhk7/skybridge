@@ -2,12 +2,14 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import { Metadata } from "next";
 import SkybridgeOccasions from "@/components/SkybridgeAllOccasions";
 
+
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Welcome to Skybridge",
 };
 
 const DashboardPage = () => {
+
   return (
     <>
       <Breadcrumb
