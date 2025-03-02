@@ -1,4 +1,5 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
+import FundraiserOccasion from "@/components/SkybridgeOccasion/FundraiserOccasion";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ const NewFundraiserPage = () => {
         description="To effectively match you with a sponsorer, please fill in some details"
         breadcrumbs={[{name:"Dashboard",href:"/dashboard"},{name:"New Fundraise Opportunity",href:"/fundraiser/new"}]}
       />
+      <FundraiserOccasion />
     </>
   );
 };

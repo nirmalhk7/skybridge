@@ -7,17 +7,17 @@ export const metadata: Metadata = {
   description: "Welcome to Skybridge",
 };
 
-const NewSponsorerPage = () => {
+const SponsorerStatus = () => {
   return (
     <>
       <Breadcrumb
-        pageName="New Sponsor Opportunity"
-        description="To effectively match you with an opportunity, please fill in some details"
-        breadcrumbs={[{name:"Dashboard",href:"/dashboard"},{name:"New Sponsor Opportunity",href:"/sponsorer/new"}]}
+        pageName="Opportunity Status"
+        description="View status of current / previous fundraising opportunity"
+        breadcrumbs={[{name:"Dashboard",href:"/dashboard"},{name:"New Fundraise Opportunity",href:"/fundraiser/new"}]}
       />
       <SponsorerOccasion />
     </>
   );
 };
 
-export default NewSponsorerPage;
+export default SponsorerStatus;

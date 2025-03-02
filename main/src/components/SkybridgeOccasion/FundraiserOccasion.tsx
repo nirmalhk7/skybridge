@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { CountrySelect, GetCountries, GetState, StateSelect } from "react-country-state-city";
 
-const SponsorerOccasion: React.FC = () => {
+const FundraiserOccasion: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -210,4 +210,4 @@ const SponsorerOccasion: React.FC = () => {
   );
 };
 
-export default SponsorerOccasion;
+export default FundraiserOccasion;

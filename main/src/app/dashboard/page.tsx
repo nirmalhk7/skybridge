@@ -1,24 +1,22 @@
-import AboutSectionOne from "@/components/About/AboutSectionOne";
 import Breadcrumb from "@/components/Common/Breadcrumb";
-
 import { Metadata } from "next";
+import SkybridgeOccasions from "@/components/SkybridgeAllOccasions";
 
 export const metadata: Metadata = {
-  title: "About Page | Free Next.js Template for Skybridge and SaaS",
-  description: "This is About Page for Skybridge Nextjs Template",
-  // other metadata
+  title: "Dashboard",
+  description: "Welcome to Skybridge",
 };
 
-const AboutPage = () => {
+const DashboardPage = () => {
   return (
     <>
       <Breadcrumb
-        pageName="About Page"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. In varius eros eget sapien consectetur ultrices. Ut quis dapibus libero."
+        pageName="Skybridge Dashboard"
+        description="You're using a Fundraiser account"
       />
-      <AboutSectionOne />
+      <SkybridgeOccasions/>
     </>
   );
 };
 
-export default AboutPage;
+export default DashboardPage;
