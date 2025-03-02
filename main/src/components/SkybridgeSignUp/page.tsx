@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const SkybridgeSignUp = () => {
   const router = useRouter();
@@ -22,14 +23,20 @@ const SkybridgeSignUp = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),
       });
-      if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Sign up failed");
+      if (res.ok) {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        })
+  
+        if (result?.error) {
+          console.error(111, result.error)
+          setErrorMsg(result.error)
+        } else {
+          router.push("/dashboard")
+        }
       }
-    const data = await res.json();  
-    localStorage.setItem("userId", data.userId);
-
-      router.push("/dashboard");
     } catch (error: any) {
       setErrorMsg(error.message);
     }

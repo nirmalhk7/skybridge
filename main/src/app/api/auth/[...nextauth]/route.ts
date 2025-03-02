@@ -15,6 +15,7 @@ declare module "next-auth" {
       name?: string;
       email?: string;
       image?: string;
+      role : string;
     };
   }
 }
@@ -23,12 +24,10 @@ export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -42,8 +41,13 @@ export const authOptions: NextAuthOptions = {
 
         const { email, password } = credentials;
 
-        await connectToDB();
-        const user = await User.findOne({ email });
+        const client = await clientPromise;
+        const db = client.db("skybridge-cluster");
+        const users = db.collection("users");
+    
+        // Find user
+        const user = await users.findOne({ email });
+
         if (!user) {
           throw new Error("No user found");
         }
@@ -58,6 +62,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          role: user.role
         };
       },
     }),
@@ -65,16 +70,16 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.uid = user.id;
+        token.role = (user as any).role
       }
-      return token;
+      return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.uid as string;
+      if (session.user) {
+        session.user.role = token.role as string
       }
-      return session;
-    },
+      return session
+    }
   },
   pages: {
     signIn: "/signin",
