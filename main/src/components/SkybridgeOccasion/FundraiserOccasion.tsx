@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 import { GetCountries, GetState } from "react-country-state-city";
 
 const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false }) => {
-
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,23 +16,18 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
 
   const { data: session, status } = useSession();
   
-  useEffect((()=>{
-    if(session){
-      setFormData((prev)=>({
+  useEffect(() => {
+    if (session) {
+      setFormData((prev) => ({
         ...prev,
         name: session.user.name,
-        email: session.user.email
-      }))
+        email: session.user.email,
+      }));
     }
-  }),[session, status]);
+  }, [session, status]);
 
   const [countriesList, setCountriesList] = useState<any[]>([]);
   const [stateList, setStateList] = useState<any[]>([]);
-
-  // State for GPT response and modal visibility
-  const [gptResponse, setGptResponse] = useState("");
-  // TODO pranay: remove this modal
-  const [showModal, setShowModal] = useState(false);
 
   // Load countries on mount
   useEffect(() => {
@@ -73,22 +66,34 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Function to fetch GPT response without streaming
-  const fetchGptResponse = async (occasionMessage: string) => {
+  const fetchAndStoreGptResponse = async (occasionMessage: string) => {
     try {
       const encodedMessage = encodeURIComponent(occasionMessage);
       const response = await fetch(`/api/gptHandler?message=${encodedMessage}`);
       const data = await response.json();
       console.log("Fetched GPT response data:", data);
       if (response.ok) {
-        setGptResponse(data.gptResponse);
+        const gptNumber = Number(data.gptResponse);
+        const addScorePayload = {
+          userId: session.user.id,
+          score: gptNumber,
+        };
+        const scoreResponse = await fetch("/api/addScore", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(addScorePayload),
+        });
+        if (!scoreResponse.ok) {
+          const errorData = await scoreResponse.json();
+          console.error("Error storing score:", errorData.error);
+        }
       } else {
         console.error("Error fetching GPT response:", data.error);
-        setGptResponse("Error fetching GPT response");
       }
     } catch (error) {
-      console.error("Error fetching GPT response:", error);
-      setGptResponse("Error fetching GPT response");
+      console.error("Error in fetchAndStoreGptResponse:", error);
     }
   };
 
@@ -100,7 +105,6 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
       return;
     }
 
-    // Capture the message before resetting the form
     const occasionMessage = formData.message;
 
     const payload = {
@@ -128,12 +132,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
           agePreference: "10-20",
           message: "",
         });
-
-        // Initialize GPT response state and display modal
-        setGptResponse("");
-        setShowModal(true);
-        console.log("Modal shown. Starting GPT response fetch.");
-        fetchGptResponse(occasionMessage);
+        fetchAndStoreGptResponse(occasionMessage);
       } else {
         const data = await response.json();
         alert(`Error: ${data.message}`);
@@ -161,7 +160,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
                       htmlFor="name"
                       className="mb-3 block text-sm font-medium text-dark dark:text-white"
                     >
-                      Your Organization's Name
+                      Your Organization&apos;s Name
                     </label>
                     <input
                       type="text"
@@ -332,23 +331,6 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
           </div>
         </div>
       </div>
-      {/* Modal for displaying OpenAI response */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-11/12 max-w-lg">
-            <h2 className="text-xl font-bold mb-4">OpenAI Response</h2>
-            <div className="mb-4 whitespace-pre-wrap" style={{ color: 'black' }}>
-              {gptResponse || "Loading..."}
-            </div>
-            <button
-              className="bg-primary text-white px-4 py-2 rounded"
-              onClick={() => setShowModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

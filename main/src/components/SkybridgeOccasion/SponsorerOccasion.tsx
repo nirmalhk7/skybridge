@@ -141,7 +141,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                       htmlFor="name"
                       className="mb-3 block text-sm font-medium text-dark dark:text-white"
                     >
-                      Your Organization's Name
+                      Your Organization&apos;s Name
                     </label>
                     <input
                       type="text"
