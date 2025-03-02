@@ -9,15 +9,7 @@ import { useSession } from "next-auth/react";
 const SkybridgeOccasions: React.FC = () => {
   const { data: session, status } = useSession();
   const [accountType, setAccountType] = useState("");
-  const [tableData, setTableData] = useState([
-    {
-      id: "23453647534",
-      name: "Sample Name",
-      type: "Scholarship",
-      status: "Approved",
-      date: "March 1st, 2025",
-    },
-  ]);
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     console.log(session);
@@ -25,11 +17,48 @@ const SkybridgeOccasions: React.FC = () => {
       setAccountType(
         session.user.role.charAt(0).toUpperCase() + session.user.role.slice(1),
       );
-    }
-    if(accountType == "Sponsorer"){
-      
-    } else if(accountType === "Fundraiser"){
+      console.log(session.user.role)
+      if (session.user.role == "sponsorer") {
+        const searchParams = new URLSearchParams({
+          sponsorerId: session.user.id,
+        });
+        fetch(`/api/searchOccasion?${searchParams.toString()}`)
+          .then((response) => response.json())
+          .then((r1) =>
+            r1.map((response) => ({
+              id: response.occasion.id,
+              name: response.occasion.id,
+              type: response.occasion.typePreference,
+              status: response.occasion.status,
+              date: "March 2nd, 2025",
+            })),
+          )
+          .then((data) => {
+            setTableData(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching search results:", error);
+          });
+      } else if (session.user.role  === "Fundraiser") {
+        const requestOptions = {
+          method: "GET"
+        };
 
+        fetch(
+          `/api/searchUserOccasion?userId=${session.user.id}`,
+          requestOptions,
+        )
+          .then((response) => response.json())
+          .then((r1)=> r1.occasions.map(e=>({
+            id: e.id,
+            name: e.name,
+            type: e.typePreference,
+            status: e.status,
+            date: "March 2nd, 2025",
+          })))
+          .then((result) => setTableData(result))
+          .catch((error) => console.error(error));
+      }
     }
   }, [session, status]);
 
@@ -47,7 +76,7 @@ const SkybridgeOccasions: React.FC = () => {
           <div className="grid grid-cols-8 gap-4">
             <div className="col-span-7">
               <h3 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-3xl">
-                All Occasions
+                All {accountType === "Fundraiser" ? "Occasion" : "Matches"}
               </h3>
             </div>
             <div>
@@ -55,7 +84,7 @@ const SkybridgeOccasions: React.FC = () => {
                 href={`/${accountType.toLowerCase()}/new`}
                 className="bg-primary p-4 text-white"
               >
-                New Occasion
+                New {accountType === "Fundraiser" ? "Occasion" : "Search"}
               </Link>
             </div>
           </div>
@@ -79,13 +108,13 @@ const SkybridgeOccasions: React.FC = () => {
                     </button>
                   </td>
                   <td>
-                    <button className="bg-green-500 text-black">
+                    <button className="bg-blue-500 text-black">
                       {row.status}
                     </button>
                   </td>
                   <td>{row.date}</td>
                   <td>
-                    <Link href={`/fundraiser/${row.id}`}>More</Link>
+                    {/* <Link href={`/fundraiser/${row.id}`}>More</Link> */}
                   </td>
                 </tr>
               ))}
