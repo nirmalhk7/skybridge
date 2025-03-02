@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../.tmp/db.sqlite"
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  role      Role
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  fundraiser Fundraiser?
+  sponsorer  Sponsorer?
+}
+
+model Fundraiser {
+  id          Int         @id @default(autoincrement())
+  userId      Int         @unique
+  user        User        @relation(fields: [userId], references: [id])
+  type        FundraiseType
+  country     String
+  state       String
+  ageGroup    String
+  pitch       String
+  tags        Tag[]       @relation("FundraiserTags")
+  opportunities Opportunity[]
+}
+
+model Sponsorer {
+  id          Int         @id @default(autoincrement())
+  userId      Int         @unique
+  user        User        @relation(fields: [userId], references: [id])
+  type        FundraiseType
+  country     String
+  state       String
+  ageGroup    String
+  tags        Tag[]       @relation("SponsorerTags")
+}
+
+model Opportunity {
+  id          Int         @id @default(autoincrement())
+  fundraiserId Int
+  fundraiser  Fundraiser  @relation(fields: [fundraiserId], references: [id])
+  tags        Tag[]       @relation("OpportunityTags")
+  score       Float
+}
+
+model Tag {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  fundraisers Fundraiser[] @relation("FundraiserTags")
+  sponsorers  Sponsorer[] @relation("SponsorerTags")
+  opportunities Opportunity[] @relation("OpportunityTags")
+}
+
+enum Role {
+  FUNDRAISER
+  SPONSORER
+}
+
+enum FundraiseType {
+  SCHOLARSHIP
+  EVENT
+  RESEARCH_GROUP
+}
