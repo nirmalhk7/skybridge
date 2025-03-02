@@ -6,7 +6,6 @@ export async function POST(req: Request) {
   try {
     const { name, email, password, role } = await req.json();
 
-    // Basic validation
     if (!name || !email || !password || !role) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -18,7 +17,6 @@ export async function POST(req: Request) {
     const db = client.db("skybridge-cluster");
     const users = db.collection("users");
 
-    // Check if user already exists
     const existingUser = await users.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -27,11 +25,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    await users.insertOne({
+    const result = await users.insertOne({
       name,
       email,
       password: hashedPassword,
@@ -39,7 +35,10 @@ export async function POST(req: Request) {
       createdAt: new Date(),
     });
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    return NextResponse.json(
+      { success: true, userId: result.insertedId.toString() },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error in signup:", error);
     return NextResponse.json(

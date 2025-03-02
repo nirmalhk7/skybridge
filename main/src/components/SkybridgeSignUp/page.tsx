@@ -10,7 +10,7 @@ const SkybridgeSignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Fundraiser"); // Default role
+  const [role, setRole] = useState("Fundraiser");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
