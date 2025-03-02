@@ -34,11 +34,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       },[session, status]);
 
-    return (
-        <AuthContext.Provider value={{}}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return children;
 };
 
 export const useAuth = () => useContext(AuthContext);

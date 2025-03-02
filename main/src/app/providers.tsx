@@ -1,6 +1,6 @@
 "use client";
 
-import AuthProvider from "@/components/AuthProvider/AuthProvider";
+import AuthProvider from "@/components/CustomProviders/AuthProvider";
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
