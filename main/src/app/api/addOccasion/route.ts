@@ -26,22 +26,28 @@ export async function POST(req: Request) {
       );
     }
 
-const updatedUser = await users.updateOne(
-  { _id: objectId },
-  [
-    {
-      $set: {
-        occasions: {
-          $concatArrays: [{ $ifNull: ["$occasions", []] }, [occasionData]],
+    // Generate a new ObjectId for the occasion
+    const occasionId = new ObjectId();
+    // Add the ID and status to the occasionData
+    const occasionWithIdAndStatus = {
+      ...occasionData,
+      id: occasionId,
+      status: occasionData.status || "Searching",
+    };
+
+    const updatedUser = await users.updateOne(
+      { _id: objectId },
+      [
+        {
+          $set: {
+            occasions: {
+              $concatArrays: [{ $ifNull: ["$occasions", []] }, [occasionWithIdAndStatus]],
+            },
+          },
         },
-      },
-    },
-  ],
-  { upsert: true },
-);
-
-
-
+      ],
+      { upsert: true },
+    );
 
     if (!updatedUser.matchedCount && !updatedUser.upsertedCount) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
