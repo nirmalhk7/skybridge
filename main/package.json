@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "truffle:compile": "truffle compile"
+    "bx:compile": "truffle compile",
+    "bx:start": "ganache-cli"
   },
   "dependencies": {
     "@next-auth/mongodb-adapter": "^1.1.3",
