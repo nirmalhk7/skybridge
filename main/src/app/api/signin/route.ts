@@ -38,6 +38,8 @@ export async function POST(req: Request) {
       );
     }
 
+    
+
     // Create JWT token
     const token = sign(
       { userId: user._id, email: user.email },
@@ -46,16 +48,14 @@ export async function POST(req: Request) {
     );
 
     // Set cookie
-    (await cookies()).set({
+    return cookies().then(cookie=>cookie.set({
       name: "skybridge_token",
       value: token,
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV !== "development",
       maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
-
-    return NextResponse.json({ success: true });
+    })).then(()=> NextResponse.json({ success: true }));
   } catch (error) {
     console.error("Error in signin:", error);
     return NextResponse.json(
