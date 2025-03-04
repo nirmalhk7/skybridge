@@ -66,7 +66,7 @@ const SkybridgeOccasions: React.FC = () => {
     <>
       <Breadcrumb
         pageName="Skybridge Dashboard"
-        description={`You're using a ${accountType} account`}
+        description={`You're using a ${accountType == "Sponsorer" ? "Sponsor": accountType} account`}
       />
       <div className="container py-8">
         <div

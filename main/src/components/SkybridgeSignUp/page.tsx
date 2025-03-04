@@ -109,7 +109,7 @@ const SkybridgeSignUp = () => {
                     placeholder="Enter your Web3 Address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none"
+                    className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                     required
                   />
                 </div>
@@ -125,7 +125,7 @@ const SkybridgeSignUp = () => {
                     className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                   >
                     <option value="fundraiser">Fundraiser</option>
-                    <option value="sponsorer">Sponsorer</option>
+                    <option value="sponsorer">Sponsor</option>
                   </select>
                 </div>
                 <div className="mb-6">
