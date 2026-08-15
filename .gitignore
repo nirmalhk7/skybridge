@@ -1,4 +1,33 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.vscode
+
+# testing
+/coverage
+
+# Next.js
+/.next/
+*.tsbuildinfo
+/out/
+
+# Solidity build output
+/build
+
+# local files
 .DS_Store
 .tmp
-.env.local
 .env
+.env.local
+.env*.local
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vercel
+.vercel
