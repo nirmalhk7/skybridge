@@ -46,6 +46,11 @@
 
 // const HDWalletProvider = require('@truffle/hdwallet-provider');
 
+const testProvider = require("ganache").provider({
+  chain: { chainId: 1337, networkId: 1337 },
+  logging: { quiet: true },
+});
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -58,6 +63,10 @@ module.exports = {
    */
 
   networks: {
+    test: {
+      provider: () => testProvider,
+      network_id: 1337,
+    },
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
     // You should run a client (like ganache, geth, or parity) in a separate terminal

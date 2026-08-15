@@ -1,12 +1,10 @@
 "use client";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
+import { BrowserProvider, ContractFactory, parseEther } from "ethers";
 import React, { useEffect, useState } from "react";
 import {
-  CountrySelect,
   GetCountries,
   GetState,
-  StateSelect,
 } from "react-country-state-city";
 
 const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
@@ -72,86 +70,125 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     >,
   ) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleApproval = (e, occasionId) => {
+  const handleApproval = async (e: React.MouseEvent, occasionId: string) => {
     e.preventDefault();
-    const raw = JSON.stringify({
-      occasionId: occasionId,
-      occasionData: {
-        status: "Approved",
-        sponsorerId: session.user.id,
-      },
-    });
+    if (!session?.user?.id) {
+      alert("Please sign in before approving an opportunity.");
+      return;
+    }
 
-    fetch("/api/updateOccasion", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: raw,
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        alert(
-          `Congratulations! You are matched with a user. Please contact them at ${result.email}`,
-        );
-        handleSubmit(e); // Call handleSubmit again
-        return result;
-      })
-      .then((result) => {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        const searchResultFilter = searchResults.find(result => result.occasion.id === occasionId);
-        const fundraiserUserId = searchResultFilter ? searchResultFilter.userId : null;
+    try {
+      const response = await fetch("/api/updateOccasion", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          occasionId,
+          occasionData: { status: "Approved" },
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to approve opportunity");
+      }
+      setSearchResults((current: any[]) =>
+        current.map((row) =>
+          String(row.occasion.id) === String(occasionId)
+            ? { ...row, occasion: { ...row.occasion, status: "Approved" } }
+            : row,
+        ),
+      );
+      const ethereum = (window as any).ethereum;
+      if (!ethereum) {
+        throw new Error("Connect a browser wallet to deploy the sponsorship agreement.");
+      }
+      const durationSeconds = Math.round(Number(durationDays) * 24 * 60 * 60);
+      if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+        throw new Error("Agreement duration must be greater than zero.");
+      }
+      const amountInWei = parseEther(amountInEther).toString();
+      const prepareResponse = await fetch("/api/deployContract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "prepare",
+          occasionId,
+          amountInWei,
+          durationSeconds,
+        }),
+      });
+      const prepared = await prepareResponse.json().catch(() => ({}));
+      if (!prepareResponse.ok) {
+        throw new Error(prepared.error || "Unable to prepare sponsorship agreement");
+      }
 
-        // This flip here is deliberate
-        const raw = JSON.stringify({
-          fundraiserId: session.user.id,
-          sponsorerId: fundraiserUserId,
-          amountInEther: "15",
-        });
-
-        const requestOptions: RequestInit = {
-          method: "POST",
-          headers: myHeaders,
-          body: raw
-        };
-
-        return fetch("/api/deployContract", requestOptions)
-          .then((response) => response.text())
-          .then((result) => console.log(result))
-          .catch((error) => console.error(error));
-      })
-      .catch((error) => console.error("Error updating occasion:", error));
+      const provider = new BrowserProvider(ethereum);
+      const signer = await provider.getSigner();
+      const signerAddress = await signer.getAddress();
+      if (signerAddress.toLowerCase() !== prepared.deployment.from.toLowerCase()) {
+        throw new Error("Connected wallet does not match the sponsor account.");
+      }
+      const factory = new ContractFactory(
+        prepared.deployment.abi,
+        prepared.deployment.bytecode,
+        signer,
+      );
+      const contract = await factory.deploy(
+        ...prepared.deployment.constructorArgs,
+        { value: BigInt(prepared.deployment.value) },
+      );
+      await contract.waitForDeployment();
+      const transactionHash = contract.deploymentTransaction()?.hash;
+      if (!transactionHash) throw new Error("Wallet did not return a deployment transaction.");
+      const network = await provider.getNetwork();
+      const recordResponse = await fetch("/api/deployContract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "recordDeployment",
+          agreementId: prepared.agreementId,
+          contractAddress: await contract.getAddress(),
+          transactionHash,
+          chainId: network.chainId.toString(),
+        }),
+      });
+      const recorded = await recordResponse.json().catch(() => ({}));
+      if (!recordResponse.ok) {
+        throw new Error(recorded.error || "Agreement deployed but could not be recorded");
+      }
+      alert(
+        `Agreement deployed. Contact ${result.fundraiser?.email || "the fundraiser"} for acceptance.`,
+      );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to approve opportunity");
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session?.user?.id) {
+      alert("Please sign in before searching for opportunities.");
+      return;
+    }
     const searchParams = new URLSearchParams({
       agePreference: formData.agePreference,
       countryPreference: formData.countryPreference,
       statePreference: formData.statePreference,
       typePreference: formData.typePreference,
+      status: "Searching",
     });
 
-    fetch(`http://localhost:3000/api/searchOccasion?${searchParams.toString()}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setSearchResults(data);
-        } else {
-          console.error("Expected an array but received:", data);
-          setSearchResults([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching search results:", error);
-      });
+    try {
+      const response = await fetch(`/api/searchOccasion?${searchParams.toString()}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to search opportunities");
+      setSearchResults(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setSearchResults([]);
+    }
   };
 
   return (
@@ -298,6 +335,40 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                         );
                       })}
                     </select>
+                  </div>
+                </div>
+                <div className="w-full px-4 md:w-1/2">
+                  <div className="mb-8">
+                    <label htmlFor="amount-in-ether" className="mb-3 block text-sm font-medium text-dark dark:text-white">
+                      Sponsorship amount (ETH)
+                    </label>
+                    <input
+                      id="amount-in-ether"
+                      type="number"
+                      min="0.000000000000000001"
+                      step="any"
+                      value={amountInEther}
+                      disabled={viewOnly}
+                      onChange={(event) => setAmountInEther(event.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="w-full px-4 md:w-1/2">
+                  <div className="mb-8">
+                    <label htmlFor="duration-days" className="mb-3 block text-sm font-medium text-dark dark:text-white">
+                      Agreement duration (days)
+                    </label>
+                    <input
+                      id="duration-days"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={durationDays}
+                      disabled={viewOnly}
+                      onChange={(event) => setDurationDays(event.target.value)}
+                      required
+                    />
                   </div>
                 </div>
                 <div className="w-full px-4">
