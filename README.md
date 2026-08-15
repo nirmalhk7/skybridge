@@ -18,6 +18,21 @@ npm run dev
 
 Set `MONGODB_URI`, `NEXTAUTH_SECRET`, and `OPENAI_API_KEY` in `.env.local` before using authenticated or AI flows.
 
+## Prisma MongoDB inspection
+
+Prisma uses the same MongoDB cluster through `PRISMA_DATABASE_URL`. Include the `skybridge-cluster` database name in that URL. Prisma is read-only in this project: no `db push` or migration is required, and application routes continue using the MongoDB driver.
+
+```bash
+npm run prisma:generate
+npm run prisma:validate
+npm run prisma:inspect
+npm run prisma:studio
+```
+
+`prisma:inspect` prints collection counts and user roles without exposing passwords. `prisma:studio` starts Prisma Studio at [http://localhost:5555](http://localhost:5555).
+
+The reusable Prisma client is available at `src/lib/prisma.ts` for future route-level adoption. Existing routes intentionally remain on the MongoDB driver until each query is migrated and verified.
+
 ## API failure logs
 
 Custom API route failures print structured diagnostics to the Next.js server terminal:

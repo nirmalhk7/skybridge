@@ -1,0 +1,64 @@
+// Prisma read/inspection model for Skybridge's existing MongoDB database.
+// The application still uses the MongoDB driver; this schema is additive and
+// does not run migrations or change the existing collection shape.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+model User {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String     @unique
+  password       String
+  role           String
+  accountAddress String?
+  createdAt      DateTime?
+  occasions      Occasion[]
+
+  @@map("users")
+}
+
+type Occasion {
+  id              String   @db.ObjectId
+  name            String
+  email           String
+  typePreference  String
+  countryPreference String
+  statePreference String
+  agePreference   String
+  message         String
+  createdDate     DateTime
+  status          String
+  score           Float?
+  scoringStatus   String?
+  sponsorerId     String?  @db.ObjectId
+  approvedDate    DateTime?
+}
+
+model EscrowAgreement {
+  id                       String   @id @default(auto()) @map("_id") @db.ObjectId
+  occasionId               String   @db.ObjectId
+  sponsorerId              String   @db.ObjectId
+  fundraiserId             String   @db.ObjectId
+  amountInWei              String
+  durationSeconds          Int
+  status                   String
+  contractAddress          String?
+  deploymentTransactionHash String?
+  chainId                  String?
+  createdAt                DateTime
+  deployedAt               DateTime?
+  updatedAt                DateTime?
+  acceptances              Json?
+
+  @@index([occasionId])
+  @@index([sponsorerId])
+  @@index([fundraiserId])
+  @@map("escrowAgreements")
+}
