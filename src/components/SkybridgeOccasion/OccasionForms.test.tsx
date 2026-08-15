@@ -61,7 +61,8 @@ describe("FundraiserOccasion", () => {
     render(<FundraiserOccasion />);
 
     expect(await screen.findByLabelText("Country Preference")).toHaveValue("1");
-    expect(await screen.findByLabelText("State Preference")).toHaveValue("10");
+    const state = await screen.findByLabelText("State Preference");
+    await waitFor(() => expect(state).toHaveValue("10"));
     expect(screen.getByLabelText("Age Preference")).toHaveValue("10-19");
   });
 
