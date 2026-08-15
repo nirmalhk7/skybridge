@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  MONGODB_URI: mongodb://127.0.0.1:27017/skybridge-cluster
+  PRISMA_DATABASE_URL: mongodb://127.0.0.1:27017/skybridge-cluster
+  NEXTAUTH_URL: http://localhost:3000
+  NEXTAUTH_SECRET: ci-only-secret-do-not-use-in-production
+  OPENAI_API_KEY: ci-not-used
+
+jobs:
+  verify:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+
+      - name: Run test suite
+        run: npm run test:all
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit --incremental false
+
+      - name: Production build
+        run: npm run build
