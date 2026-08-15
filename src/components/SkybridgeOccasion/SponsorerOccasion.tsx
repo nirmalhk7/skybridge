@@ -341,7 +341,9 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                       <td>{row.occasion.score}</td>
                       <td>
                         <button
+                          type="button"
                           onClick={(e) => handleApproval(e, row.occasion.id)}
+                          disabled={row.occasion.status !== "Searching"}
                           className="bg-white text-black"
                         >
                           {row.occasion.status === "Searching"

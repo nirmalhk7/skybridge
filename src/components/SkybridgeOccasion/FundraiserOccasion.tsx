@@ -305,6 +305,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
                       Your Message
                     </label>
                     <textarea
+                      id="message"
                       name="message"
                       rows={5}
                       placeholder="Enter your Message"

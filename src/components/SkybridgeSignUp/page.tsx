@@ -100,10 +100,11 @@ const SkybridgeSignUp = () => {
                   />
                 </div>
                 <div className="mb-8">
-                  <label htmlFor="password" className="mb-3 block text-sm text-dark dark:text-white">
+                  <label htmlFor="accountAddress" className="mb-3 block text-sm text-dark dark:text-white">
                     Your Web3 Address
                   </label>
                   <input
+                    id="accountAddress"
                     type="text"
                     name="accountAddress"
                     placeholder="Enter your Web3 Address"

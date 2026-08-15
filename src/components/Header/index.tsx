@@ -92,8 +92,42 @@ const Header = () => {
                   <ThemeToggler />
                 </div>
               </div>
+              <button
+                type="button"
+                aria-label={navbarOpen ? "Close navigation" : "Open navigation"}
+                aria-expanded={navbarOpen}
+                onClick={navbarToggleHandler}
+                className="absolute right-4 rounded p-2 text-dark dark:text-white md:hidden"
+              >
+                <span aria-hidden="true">{navbarOpen ? "×" : "☰"}</span>
+              </button>
             </div>
           </div>
+          {navbarOpen && (
+            <nav
+              aria-label="Mobile navigation"
+              className="mb-4 rounded bg-white p-4 shadow-three dark:bg-gray-dark md:hidden"
+            >
+              {status === "authenticated" ? (
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="w-full rounded bg-primary px-4 py-3 text-white"
+                >
+                  Sign Out {session.user.name}
+                </button>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <Link href="/signin" onClick={() => setNavbarOpen(false)}>
+                    Sign In
+                  </Link>
+                  <Link href="/signup" onClick={() => setNavbarOpen(false)}>
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </nav>
+          )}
         </div>
       </header>
     </>
