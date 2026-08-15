@@ -8,9 +8,9 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "230",
-    statePreference: "1450",
-    agePreference: "10-20",
+    countryPreference: "",
+    statePreference: "",
+    agePreference: "10-19",
     message: "",
   });
 
@@ -31,28 +31,32 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
 
   // Load countries on mount
   useEffect(() => {
-    GetCountries().then((result) => {
+    GetCountries().then((result: any[]) => {
       setCountriesList(result);
-      if (result.length > 0 && !formData.countryPreference) {
-        setFormData((prev) => ({
-          ...prev,
-          countryPreference: result[0].id.toString(),
-        }));
-      }
+      setFormData((prev) => {
+        const isValid = result.some(
+          (country) => String(country.id) === prev.countryPreference,
+        );
+        return isValid || result.length === 0
+          ? prev
+          : { ...prev, countryPreference: String(result[0].id) };
+      });
     });
   }, []);
 
   // Load states when countryPreference changes
   useEffect(() => {
     if (formData.countryPreference) {
-      GetState(Number(formData.countryPreference)).then((result) => {
+      GetState(Number(formData.countryPreference)).then((result: any[]) => {
         setStateList(result);
-        if (result.length > 0 && !formData.statePreference) {
-          setFormData((prev) => ({
-            ...prev,
-            statePreference: result[0].id.toString(),
-          }));
-        }
+        setFormData((prev) => {
+          const isValid = result.some(
+            (stateInfo) => String(stateInfo.id) === prev.statePreference,
+          );
+          return isValid || result.length === 0
+            ? prev
+            : { ...prev, statePreference: String(result[0].id) };
+        });
       });
     }
   }, [formData.countryPreference]);
@@ -66,16 +70,23 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const fetchAndStoreGptResponse = async (occasionMessage: string) => {
+  const fetchAndStoreGptResponse = async (
+    occasionId: string,
+    occasionMessage: string,
+  ) => {
     try {
-      const encodedMessage = encodeURIComponent(occasionMessage);
-      const response = await fetch(`/api/gptHandler?message=${encodedMessage}`);
+      const response = await fetch("/api/gptHandler", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: occasionMessage }),
+      });
       const data = await response.json();
       console.log("Fetched GPT response data:", data);
       if (response.ok) {
-        const gptNumber = Number(data.gptResponse);
+        const gptNumber = Number(data.score);
         const addScorePayload = {
-          userId: session.user.id,
+          userId: session?.user?.id,
+          occasionId,
           score: gptNumber,
         };
         const scoreResponse = await fetch("/api/addScore", {
@@ -99,9 +110,9 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userId = session.user.id;
+    const userId = session?.user?.id;
     if (!userId) {
-      alert("User not logged in");
+      alert("Please sign in before creating an opportunity.");
       return;
     }
 
@@ -121,6 +132,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
         body: JSON.stringify(payload),
       });
 
+      const data = await response.json().catch(() => ({}));
       if (response.ok) {
         alert("Occasion added successfully!");
         setFormData({
@@ -129,13 +141,14 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
           typePreference: "scholarships",
           countryPreference: formData.countryPreference,
           statePreference: formData.statePreference,
-          agePreference: "10-20",
+          agePreference: "10-19",
           message: "",
         });
-        fetchAndStoreGptResponse(occasionMessage);
+        if (data.occasionId) {
+          fetchAndStoreGptResponse(data.occasionId, occasionMessage);
+        }
       } else {
-        const data = await response.json();
-        alert(`Error: ${data.message}`);
+        alert(`Error: ${data.error || data.message || "Unable to add opportunity"}`);
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -163,6 +176,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
                       Your Organization&apos;s Name
                     </label>
                     <input
+                      id="name"
                       type="text"
                       name="name"
                       placeholder="Enter your name"
@@ -183,6 +197,7 @@ const FundraiserOccasion: React.FC<{ viewOnly?: boolean }> = ({ viewOnly = false
                       Your Organization Email
                     </label>
                     <input
+                      id="email"
                       type="email"
                       name="email"
                       placeholder="Enter your email"

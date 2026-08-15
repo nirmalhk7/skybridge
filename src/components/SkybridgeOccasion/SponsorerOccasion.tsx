@@ -14,13 +14,15 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     name: "",
     email: "",
     typePreference: "scholarships",
-    countryPreference: "233",
-    statePreference: "1450",
-    agePreference: "10-20",
+    countryPreference: "",
+    statePreference: "",
+    agePreference: "10-19",
     message: "",
   });
 
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [amountInEther, setAmountInEther] = useState("0.015");
+  const [durationDays, setDurationDays] = useState("30");
 
   const { data: session, status } = useSession();
   useEffect(() => {
@@ -33,33 +35,37 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
     }
   }, [session, status]);
 
-  const [countriesList, setCountriesList] = useState([]);
-  const [stateList, setStateList] = useState([]);
+  const [countriesList, setCountriesList] = useState<any[]>([]);
+  const [stateList, setStateList] = useState<any[]>([]);
 
   // Load countries on mount
   useEffect(() => {
-    GetCountries().then((result) => {
+    GetCountries().then((result: any[]) => {
       setCountriesList(result);
-      if (result.length > 0 && !formData.countryPreference) {
-        setFormData((prev) => ({
-          ...prev,
-          countryPreference: result[0].id.toString(),
-        }));
-      }
+      setFormData((prev) => {
+        const isValid = result.some(
+          (country) => String(country.id) === prev.countryPreference,
+        );
+        return isValid || result.length === 0
+          ? prev
+          : { ...prev, countryPreference: String(result[0].id) };
+      });
     });
   }, []);
 
   // Load states when countryPreference changes
   useEffect(() => {
     if (formData.countryPreference) {
-      GetState(Number(formData.countryPreference)).then((result) => {
+      GetState(Number(formData.countryPreference)).then((result: any[]) => {
         setStateList(result);
-        if (result.length > 0 && !formData.statePreference) {
-          setFormData((prev) => ({
-            ...prev,
-            statePreference: result[0].id.toString(),
-          }));
-        }
+        setFormData((prev) => {
+          const isValid = result.some(
+            (stateInfo) => String(stateInfo.id) === prev.statePreference,
+          );
+          return isValid || result.length === 0
+            ? prev
+            : { ...prev, statePreference: String(result[0].id) };
+        });
       });
     }
   }, [formData.countryPreference]);
@@ -210,6 +216,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                       Your Organization&apos;s Name
                     </label>
                     <input
+                      id="name"
                       type="text"
                       name="name"
                       placeholder="Enter your name"
@@ -229,6 +236,7 @@ const SponsorerOccasion: React.FC<{ viewOnly?: boolean }> = ({
                       Your Organization Email
                     </label>
                     <input
+                      id="email"
                       type="email"
                       name="email"
                       placeholder="Enter your email"

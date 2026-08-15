@@ -11,7 +11,7 @@ const SkybridgeSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [address, setAddress] = useState("");
-  const [role, setRole] = useState("Fundraiser");
+  const [role, setRole] = useState("fundraiser");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
@@ -22,8 +22,19 @@ const SkybridgeSignUp = () => {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          accountAddress: address,
+          role,
+        }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErrorMsg(data.error || data.message || "Unable to create account");
+        return;
+      }
       if (res.ok) {
         const result = await signIn("credentials", {
           email,
@@ -32,7 +43,6 @@ const SkybridgeSignUp = () => {
         })
   
         if (result?.error) {
-          console.error(111, result.error)
           setErrorMsg(result.error)
         } else {
           router.push("/dashboard")
@@ -62,6 +72,7 @@ const SkybridgeSignUp = () => {
                     Full Name
                   </label>
                   <input
+                    id="name"
                     type="text"
                     name="name"
                     placeholder="Enter your full name"
@@ -76,6 +87,7 @@ const SkybridgeSignUp = () => {
                     Email
                   </label>
                   <input
+                    id="email"
                     type="email"
                     name="email"
                     placeholder="Enter your Email"
@@ -90,6 +102,7 @@ const SkybridgeSignUp = () => {
                     Your Password
                   </label>
                   <input
+                    id="password"
                     type="password"
                     name="password"
                     placeholder="Enter your Password"
